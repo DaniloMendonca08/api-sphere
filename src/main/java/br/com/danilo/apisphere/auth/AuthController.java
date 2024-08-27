@@ -16,10 +16,12 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/login")
@@ -28,20 +30,11 @@ public class AuthController {
         var user = userRepository.findByEmail(credentials.email())
                 .orElseThrow(()-> new RuntimeException("Access denied"));
 
-        //caso a senha fornecida não for igual a senha criptografada no banco
+        //caso a senha fornecida não for igual a senha criptografada no banco por isso o uso do "!"
         if ( !passwordEncoder.matches(credentials.password(), user.getPassword()) )
             throw new RuntimeException("Wrong password");
 
-        //variavel contendo o tempo que irá expirar e convertendo para o horário brasileiro
-        var expiresAt = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.ofHours(-3));
-        Algorithm algorithm = Algorithm.HMAC256("assinatura");
-        String token = JWT.create()
-                .withIssuer("sphere")
-                .withSubject(credentials.email())
-                .withClaim("role", "admin")
-                .withExpiresAt(expiresAt)
-                .sign(algorithm);
+        return tokenService.create(user);
 
-        return new Token(token);
     }
 }
