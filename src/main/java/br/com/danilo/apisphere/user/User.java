@@ -16,6 +16,7 @@ public class User {
     String bio;
     String email;
     String password;
+    String avatar;
 
     //data em que a conta foi criada
     LocalDateTime createdAt;

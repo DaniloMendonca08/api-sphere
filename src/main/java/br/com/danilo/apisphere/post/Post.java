@@ -1,5 +1,6 @@
 package br.com.danilo.apisphere.post;
 
+import br.com.danilo.apisphere.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,4 +15,7 @@ public class Post {
     Long id;
     String text;
     LocalDateTime createdAt;
+
+    @ManyToOne
+    User user;
 }
